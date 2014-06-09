@@ -34,6 +34,8 @@ int accx_temp=0;
 int accy_temp=0;
 int accz_temp=0;
 
+char buffer[128];
+
 double pid[8][3];
 int i,cmd,pidN,PID,n,s;
 int biasAX=0,biasAY=0,biasAZ=0;
@@ -67,7 +69,7 @@ void setup(){
   Serial1.begin(57600);  
   while(!Serial1);
    
-  Serial1.println("#STARTING!;");
+  Serial1.println("#STARTING!");
    
   //sensorInit();
   PID_init();
@@ -77,9 +79,10 @@ void setup(){
   
   while(!run)
   {     
-      serial();     
+      serial();  
+      
       if(run)  
-      motorArm();       
+          motorArm();       
   }
   
   tp=millis();  

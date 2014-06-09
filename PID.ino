@@ -4,7 +4,7 @@ void PID_init(){
   PIDpitch.ChangeParameters(PITCH_PID_KP,PITCH_PID_KI,PITCH_PID_KD,PITCH_PID_MIN,PITCH_PID_MAX);
   PIDyaw.ChangeParameters(YAW_PID_KP,YAW_PID_KI,YAW_PID_KD,YAW_PID_MIN,YAW_PID_MAX);
   
-  Serial1.println("#PID initialized!;");
+  Serial1.println("#PID initialized!");
 }
 
 

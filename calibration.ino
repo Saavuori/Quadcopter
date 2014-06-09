@@ -1,13 +1,13 @@
 int gX,gY,gZ,aX,aY,aZ;
 
 void calibrateGYRO(){  
-    
+/*    
   i=0;
   gX=0;
   gY=0;
   gZ=0;
 
- Serial1.println("Calibrating....Dont move the board!");
+ Serial1.println("Calibrating....Dont move the board!TESDT");
   while(i<500){ 
     
     mpu.getMotion6(&ax,&ay,&az,&gx,&gy,&gz);
@@ -84,4 +84,6 @@ void calibrateACC(){
     Serial1.println(mpu.getZAccelOffset());       
     
   Serial1.println("Ready");
+  
+  */
 }

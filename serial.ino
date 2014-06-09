@@ -5,14 +5,15 @@ void serial()
    {
      time = millis();
      alarm = false;
-   
-     cmd   = Serial1.read();
-   
+    
+     cmd = Serial1.read();
+  
+     
       switch(cmd)
       {
-      
         case 'S':  //SET
-      
+                Serial1.println("SET..");
+                Serial1.println(Serial1.available());
                 s = Serial1.read();
                 
                 if(s == 'S')    //SET POINT
@@ -27,20 +28,20 @@ void serial()
                           setYaw  = Serial1.parseFloat(); 
                 }     
                 
-                if(s == 'P')  //PID VALUE
+                else if(s == 'P')  //PID VALUE
                 {
                     pidN  = Serial1.parseInt();
                     PID = Serial1.read();                     
                     pid[pidN][n]= Serial1.parseFloat();        
                 }   
 
-                if(s =='A')  //START
+               else  if(s =='A')  //START
                 {                  
                     run = true;
-                    Serial1.println("#Start!;");                                           
+                    Serial1.println("#Start!");                                           
                 }
                 
-                if(s =='Q')   //STOP
+               else if(s =='Q')   //STOP
                 {
                     run = false; 
                     Serial1.println("#STOP!");
@@ -48,23 +49,31 @@ void serial()
                
         break;      
         case 'G':  //GET
-      
-               s = Serial1.read();
-      
+                Serial1.println("GET..");
+                Serial1.println(Serial1.available());
               if(s =='M')
               {
-                  Serial1.print(m1_val);
-                  Serial1.print(" ");
-                  Serial1.print(m2_val);
-                  Serial1.print(" ");
-                  Serial1.print(m3_val);
-                  Serial1.print(" ");
-                  Serial1.println(m4_val);
-              }
-                        
-        break;  
+                  Serial1.print("1: ");
+                  Serial1.println(m1_val);
+                  Serial1.print("2: ");
+                  Serial1.println(m2_val);
+                  Serial1.print("3: ");
+                  Serial1.println(m3_val);
+                  Serial1.print("4: ");
+                  Serial1.println(m4_val);                  
+              }                        
+        break; 
+        
+        default:  
+        
+        Serial1.println("Unkown command"); 
+        
+        break;
+        
+     }
      
-        Serial1.println("Unkown command: "+ cmd);        
-     }Serial1.flush();      
+     Serial1.flush();      
    }  
+   
+   
 }
