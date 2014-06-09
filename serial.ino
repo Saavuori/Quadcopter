@@ -1,3 +1,6 @@
+unsigned long serialdata;
+int inbyte;
+
 void serial()
 {
  
@@ -6,16 +9,16 @@ void serial()
      time = millis();
      alarm = false;
    
-     cmd   = Serial1.read();
+      getSerial();
    
-      switch(cmd)
+      switch(serialdata)
       {
       
         case 'S':  //SET
       
-                s = Serial1.read();
+                getSerial();
                 
-                if(s == 'S')    //SET POINT
+                if(serialdata == 'S')    //SET POINT
                 {                
                    s = Serial1.read();
                    
@@ -27,20 +30,20 @@ void serial()
                           setYaw  = Serial1.parseFloat(); 
                 }     
                 
-                if(s == 'P')  //PID VALUE
+                if(serialdata == 'P')  //PID VALUE
                 {
                     pidN  = Serial1.parseInt();
                     PID = Serial1.read();                     
                     pid[pidN][n]= Serial1.parseFloat();        
                 }   
 
-                if(s =='A')  //START
+                if(serialdata =='A')  //START
                 {                  
                     run = true;
                     Serial1.println("#Start!;");                                           
                 }
                 
-                if(s =='Q')   //STOP
+                if(serialdata =='Q')   //STOP
                 {
                     run = false; 
                     Serial1.println("#STOP!");
@@ -49,9 +52,9 @@ void serial()
         break;      
         case 'G':  //GET
       
-               s = Serial1.read();
+               getSerial();
       
-              if(s =='M')
+              if(serialdata =='M')
               {
                   Serial1.print(m1_val);
                   Serial1.print(" ");
@@ -64,7 +67,23 @@ void serial()
                         
         break;  
      
-        Serial1.println("Unkown command: "+ cmd);        
+        Serial1.println("Unkown command:");        
      }Serial1.flush();      
    }  
+}
+
+long getSerial()
+{
+  serialdata = 0;
+  while (inbyte != '/')
+  {
+    inbyte = Serial.read(); 
+    if (inbyte > 0 && inbyte != '/')
+    {
+     
+      serialdata = serialdata * 10 + inbyte - '0';
+    }
+  }
+  inbyte = 0;
+  return serialdata;
 }
