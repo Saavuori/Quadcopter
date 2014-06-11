@@ -38,29 +38,32 @@ void updateSensorVal(){
   
   Vector norm = mag.readNormalize();
   
+  filterACC();  
+  
   heading = atan2(norm.YAxis, norm.XAxis)*RadToDeg;
   
   t = millis();
   dt = (float)(t-tp)/1000.0;
     
   accPitch   = atan2(ay,sqrt(pow((az),2)+pow((ax),2)))*RadToDeg; 
-  accRoll    = atan2(ax,sqrt(pow((az),2)+pow((ay),2)))*RadToDeg; 
+  //accRoll    = atan2(ax,sqrt(pow((az),2)+pow((ay),2)))*RadToDeg; 
   
-  accPitch2  = atan2(ay,az)*RadToDeg; 
+  //accPitch2  = atan2(ay,az)*RadToDeg; 
   accRoll2   = atan2(ax,az)*RadToDeg; 
     
-  Pitch = SPLIT*(-gx_aver/14.375*dt+Pitch)+(1.0-SPLIT)*accPitch;    //gyroPitch += (-gx/14.375)*dt;
-  Roll  = SPLIT*( gy_aver/14.375*dt+Roll)+(1.0-SPLIT)*accRoll;      //gyroRoll  += ( gy/14.375)*dt;
+  Pitch = SPLIT*(-gx/14.375*dt+Pitch)+(1.0-SPLIT)*accPitch;    //gyroPitch += (-gx/14.375)*dt;
+  Roll  = SPLIT*( gy/14.375*dt+Roll)+(1.0-SPLIT)*accRoll2;      //gyroRoll  += ( gy/14.375)*dt;
   
   tp=t; 
   
   
 }
 
-
 void filterACC()
 {  
-  axf=((ACC_HPF_NR*axf)+((100-ACC_HPF_NR)*ax))/100;
-  ayf=((ACC_HPF_NR*ayf)+((100-ACC_HPF_NR)*ay))/100;
-  azf=((ACC_HPF_NR*azf)+((100-ACC_HPF_NR)*az))/100; 
+  axf=((ACC_HPF_NR*axf)+((100-ACC_HPF_NR)*(float)ax))/100;
+  ayf=((ACC_HPF_NR*ayf)+((100-ACC_HPF_NR)*(float)ay))/100;
+  azf=((ACC_HPF_NR*azf)+((100-ACC_HPF_NR)*(float)az))/100; 
 }
+
+

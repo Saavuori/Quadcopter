@@ -21,11 +21,10 @@
 
 //*********Sensor Config****************
 
-#define SPLIT  0.90 //COMP-filter nr
-#define RadToDeg 180.0/PI 
+#define  SPLIT  0.90 //COMP-filter nr
+#define  RadToDeg 180.0/PI 
 #define  ACC_HPF_NR  10  //high pass filter nr
-#define  GYRO_HPF_NR 0   //high pass filter nr
-#define  GYRO_MAF_NR  2  //Moving average filter nr
+#define  GYRO_MAF_NR  3  //Moving average filter nr
 //*************************************
 
 //***********MOTOR CONFIG**************
@@ -36,18 +35,28 @@
 #define MOTOR_MAX_LEVEL  254
 
 //Motor Pins
-#define MOTOR1  6
-#define MOTOR2  10
-#define MOTOR3  5
+#define MOTOR1  3
+#define MOTOR2  5
+#define MOTOR3  6
 #define MOTOR4  9
 
 //*************************************
 
 //***********LEDS**************
 
-#define LED_R 1
-#define LED_Y 2
-#define LED_G 3
+#define LED_R 10
+#define LED_Y 11
+#define LED_G 12
 
 //*************************************
+
+
+//***********SAFETY**************
+
+#define ALARM_LOW 10000
+#define ALARM_HIGH 20000
+#define DESCEND_RATE 0.95 // per/s
+
+//*************************************
+
 

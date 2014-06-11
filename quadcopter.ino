@@ -26,9 +26,9 @@ unsigned long tp;
 
 float Pitch,Roll;
 
-float gx_aver=0;
-float gy_aver=0;
-float gz_aver=0;
+volatile float gx_aver=0;
+volatile float gy_aver=0;
+volatile float gz_aver=0;
 
 int accx_temp=0;
 int accy_temp=0;
@@ -37,13 +37,18 @@ int accz_temp=0;
 char buffer[128];
 
 double pid[8][3];
-int i,cmd,pidN,PID,n,s;
+int serialdata;
+int inbyte;
+volatile int cmd;
+int i,pidN,PID,n,s;
 int biasAX=0,biasAY=0,biasAZ=0;
 int biasGX=0,biasGY=0,biasGZ=0;
 
 int setPitch = 0;  //Setpoint Pitch
 int setRoll = 0;  //Setpoint Roll
 int setYaw = 0;  //Setpoint Yawn
+int throttle =0;
+
 
 float accx, accy;
 
@@ -51,13 +56,8 @@ float accPitch=0,gyroPitch=0;
 float accRoll2=0,accPitch2=0; //Test
 float accRoll=0, gyroRoll=0;
 
-int throttle=MOTOR_ZERO_LEVEL;
-
 unsigned long time = millis();
 unsigned long timer = millis();
-
-unsigned long alarmLow  = 5000;
-unsigned long alarmHigh = 10000;
 
 boolean alarm = false;
 boolean run = false;
@@ -66,50 +66,63 @@ void setup(){
   
   
   Wire.begin();  
+  
   Serial1.begin(57600);  
   while(!Serial1);
+  
+  TWBR = ((F_CPU / 400000L) - 16) / 2;
    
   Serial1.println("#STARTING!");
    
-  //sensorInit();
+  sensorInit();
   PID_init();
   motorInit();
-  
+  LED_INIT();
+  ledON(LED_G);
   Serial1.println("#READY...");
   
   while(!run)
   {     
       serial();  
-      
-      if(run)  
-          motorArm();       
-  }
+      LED_ON(LED_Y);
+      if(run) 
+          motorArm();           
+  }LED_OFF(LED_Y);
   
   tp=millis();  
   timer=millis(); 
 }
 
-
 void loop() {   
    
   while(run){
-      if((millis()-time) > alarmLow && !alarm ){
+    
+    LED_ON(LED_G);
+    LED_OFF(LED_R);    
+    
+    if((millis()-time) > ALARM_LOW && !alarm ){
           setPitch=0;
           setRoll=0;
           alarm = true;
           Serial1.println("#AlarmLow;");
       }  
-      if((millis()-time)>alarmHigh && millis()-timer>1000){  
+      if((millis()-time)>ALARM_HIGH && millis()-timer>1000){  
           timer = millis();   
-          throttle = throttle*0.95;   //todo: if baro decend
+          throttle = throttle*DESCEND_RATE;   //todo: if baro decend
           Serial1.println("#Alarmhigh;");
       }
  
-    //updateSensorVal(); 
+    updateSensorVal(); 
+    
     FlightControl();
+    
     serial();
+   
+
+    
   }
-  
+  LED_ON(LED_R);
+  LED_OFF(LED_G);
   motorStop();
   
   setPitch=0;

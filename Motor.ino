@@ -19,6 +19,7 @@ void motorArm(){
   analogWrite(MOTOR3,MOTOR_ARM_START);
   analogWrite(MOTOR4,MOTOR_ARM_START);
   
+  throttle = MOTOR_ARM_START;
   Serial1.println("#Motors armed!");
 }
 
@@ -26,9 +27,7 @@ void motorStop(){
   analogWrite(MOTOR1,0);
   analogWrite(MOTOR2,0);
   analogWrite(MOTOR3,0);
-  analogWrite(MOTOR4,0);
-  
-  Serial1.println("#Motors stopped!");
+  analogWrite(MOTOR4,0); 
 }
 
 
