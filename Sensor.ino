@@ -23,12 +23,21 @@ void sensorInit()
   mpu.setFullScaleGyroRange(MPU6050_GYRO_FS_2000); //+/-2000 deg/s  
   mpu.setFullScaleAccelRange(MPU6050_ACCEL_FS_8); //acc +/- 8g 
   mpu.setDLPFMode(5);
+  
+  Serial1.println("MPU6050 Initialized!");
  
   mag.begin();
   mag.setRange(HMC5883L_RANGE_1_3GA);
   mag.setMeasurementMode(HMC5883L_CONTINOUS);
   mag.setDataRate(HMC5883L_DATARATE_30HZ);
   mag.setSamples(HMC5883L_SAMPLES_4);
+  
+  Serial1.println("MAG Initialized!");
+  
+  bar.init();
+  
+  
+  
 }
 
 
