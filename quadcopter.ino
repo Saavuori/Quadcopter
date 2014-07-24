@@ -1,6 +1,3 @@
-
-
-
 #include <PIDCont.h>
 #include <I2Cdev.h>
 
@@ -33,10 +30,14 @@ unsigned long timeMotors = millis();
 unsigned long timePID= millis();
 unsigned long timer = millis();
 
-volatile boolean alarm = false;
-volatile boolean run   = false;
-volatile boolean tmp   = true;
-volatile boolean first = true;
+//States
+boolean alarm = false;
+boolean run   = false;
+boolean tmp   = true;
+boolean run_first = true;
+boolean stop_first = true;
+boolean alarm_low_first = true;
+boolean alarm_high_first = true;
 
 unsigned long tp;
 
@@ -57,8 +58,8 @@ void setup(){
   PID_init();
 
   LED_INIT();
-  LED_ON(LED_G);
-  Serial1.println("#READY...");
+  LED_ON(LED_Y);
+  Serial1.println("#PRESS START TO ACTIVATE QUADCOPTER...");
   
   while(!run)
   {     
@@ -79,13 +80,15 @@ void loop() {
    
   while(run)
   {  
-    if(first)
+    if(run_first)
     {      
       LED_ON(LED_G);
       LED_OFF(LED_R);
-      PID_RESET_I();   
-      first = false;
-      Serial1.println("RUN");  
+      PID_RESET_I();  
+      Serial1.println("ACTIVE!...");
+      
+      run_first = false;
+      stop_first = true;
     }
     
     updateSensorVal();    
@@ -95,13 +98,21 @@ void loop() {
     
   }
       
+      if(stop_first)
+    {      
+
+      LED_OFF(LED_G);
+      LED_ON(LED_R);
+      Serial1.println("STOP!...");
+      
+      run_first = true;
+      stop_first = false;
+    }
+  
       
   updateSensorVal();
-    
   PID_COMPUTE();
-    
   serial();  
-  
   
   
 }
