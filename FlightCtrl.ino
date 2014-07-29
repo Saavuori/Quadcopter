@@ -1,5 +1,6 @@
 void FlightControl(){
   
+    //---------------SAFETY----------------------
   
       if((millis()-time) > ALARM_LOW && !alarm )      // LOW ALARM
       {
@@ -30,11 +31,8 @@ void FlightControl(){
       }
           
           
-          
-  
-      
-      
-      
+    //****************************************
+    
   
   motorWrite(m1_val,m2_val,m3_val,m4_val);
     
