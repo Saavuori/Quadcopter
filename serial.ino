@@ -27,13 +27,7 @@ void serial()
                           setYaw  = Serial1.parseFloat(); 
                       if(cmd=='T')
                           throttle = Serial1.parseInt();
-                }                   
-                else if(cmd == 'P')  //PID VALUE
-                {
-                    pidN  = Serial1.parseInt();
-                    PID = Serial1.read();                     
-                    pid[pidN][n]= Serial1.parseFloat();        
-                } 
+                }                  
                 else if(cmd =='A')  //START
                 {                  
                     run = true;
@@ -44,8 +38,14 @@ void serial()
                     run = false; 
                     Serial1.println("#STOP!");
                 }
-                else
-               
+                #ifdef DEBUG
+                else if(cmd == 'P')  //PID VALUE
+                {
+                    pidN  = Serial1.parseInt();
+                    PID = Serial1.read();                     
+                    pid[pidN][n]= Serial1.parseFloat();        
+                } 
+               #endif
         break;      
         case 'G':  //GET
         
