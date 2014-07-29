@@ -57,6 +57,7 @@
 #define ALARM_HIGH 20000
 #define DESCEND_RATE 0.95 // per/s
 
+#define DEBUG
 //*************************************
 
 
