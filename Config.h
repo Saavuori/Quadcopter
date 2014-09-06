@@ -90,13 +90,8 @@
 #define DESCEND_RATE 0.99
 
 
-<<<<<<< HEAD
 //----------------------------------------
 #define radToDeg 180.0/PI
-=======
-#define DEBUG
-//*************************************
->>>>>>> origin/master
 
 
 #define SLOWLOOP 5

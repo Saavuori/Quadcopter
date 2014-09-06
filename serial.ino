@@ -25,7 +25,6 @@ void serial()
                   
                 if(cmd == 'S')    //SET POINT
                 {                
-<<<<<<< HEAD
                       cmd = Serial1.read();                             
                       if(cmd=='P') setPitch = Serial1.parseFloat();                        
                       if(cmd=='R') setRoll  = Serial1.parseFloat(); 
@@ -58,39 +57,6 @@ void serial()
                           
                     }delay(2000);                    
                 }      
-=======
-                       getSerial();
-                        
-                      if(cmd=='P')
-                          setPitch = Serial1.parseFloat(); 
-                      if(cmd=='R')
-                          setRoll  = Serial1.parseFloat(); 
-                      if(cmd=='Y')
-                          setYaw  = Serial1.parseFloat(); 
-                      if(cmd=='T')
-                          throttle = Serial1.parseInt();
-                }                  
-                else if(cmd =='A')  //START
-                {                  
-                    run = true;
-                    Serial1.println("#Start!");                                           
-                }                
-                else if(cmd =='Q')   //STOP
-                {
-                    run = false; 
-                    Serial1.println("#STOP!");
-                }
-                #ifdef DEBUG
-                else if(cmd == 'P')  //PID VALUE
-                {
-                    pidN  = Serial1.parseInt();
-                    PID = Serial1.read();                     
-                    pid[pidN][n]= Serial1.parseFloat();        
-                } 
-               #endif
-        break;      
-        case 'G':  //GET
->>>>>>> origin/master
         
             break;
           //*******************GET****************************      
