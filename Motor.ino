@@ -1,33 +1,49 @@
 
-void motorInit(){
+void motorInit()
+{
   pinMode(MOTOR1,OUTPUT); 
   pinMode(MOTOR2,OUTPUT);
   pinMode(MOTOR3,OUTPUT);
   pinMode(MOTOR4,OUTPUT);
   
-  analogWrite(MOTOR1,MOTOR_ZERO_LEVEL);
-  analogWrite(MOTOR2,MOTOR_ZERO_LEVEL);
-  analogWrite(MOTOR3,MOTOR_ZERO_LEVEL);
-  analogWrite(MOTOR4,MOTOR_ZERO_LEVEL);
- 
-  Serial1.println("#Motors initialized!");
-}
-
-void motorArm(){
-  analogWrite(MOTOR1,MOTOR_ARM_START);
-  analogWrite(MOTOR2,MOTOR_ARM_START);
-  analogWrite(MOTOR3,MOTOR_ARM_START);
-  analogWrite(MOTOR4,MOTOR_ARM_START);
+  for(int i=0;i<4;i++)
+    m[i]=MOTOR_ZERO_LEVEL;
   
-  throttle = MOTOR_ARM_START;
-  Serial1.println("#Motors armed!");
+  motorWrite();
+ 
+  Serial1.println("#MOTORS INITIALIZED!");
 }
 
-void motorStop(){
-  analogWrite(MOTOR1,0);
-  analogWrite(MOTOR2,0);
-  analogWrite(MOTOR3,0);
-  analogWrite(MOTOR4,0); 
+void motorStop()
+{
+  for(int i=0;i<4;i++)
+    m[i]=MOTOR_ZERO_LEVEL;
+  
+  motorWrite();  
+  
+  Serial1.println("#MOTORS STOPPED");
+}
+
+void motorWrite()
+{      
+
+  analogWrite(MOTOR1,m[0]);
+  analogWrite(MOTOR2,m[1]);
+  analogWrite(MOTOR3,m[2]);
+  analogWrite(MOTOR4,m[3]);  
+
+   
+   if(MOTOR_INFO && millis()-timeMotors > 100)
+   {
+      timeMotors=millis();          
+      Serial1.print("M");
+      for(int i=0;i<4;i++)
+          {
+             Serial1.print(m[i]);
+             Serial1.print(";");
+          } 
+      Serial1.print("\n"); 
+   }  
 }
 
 

@@ -1,135 +1,130 @@
-#include <HMC5883L.h>
-#include <PIDCont.h>
-#include <MPU6050.h>
+#include <PID.h>
+#include <MS561101BA.h>
 #include <I2Cdev.h>
+#include <MPU6050.h>
 #include "Wire.h"
 #include "Config.h"
+#include "Kalman.h" 
 
 MPU6050 mpu;
-HMC5883L mag;
+MS561101BA baro = MS561101BA();
 
-float GYRO_X_OFFSET;
-float GYRO_Y_OFFSET;
-float GYRO_Z_OFFSET;
+PID pids[6];  
 
-int ACC_X_OFFSET;
-int ACC_Y_OFFSET;
-int ACC_Z_OFFSET;
+double SetX=0,SetY=0,SetZ=0;
+double gyroXrate;
+double gyroYrate;
+double gyroZrate;
 
-float heading;
+int PID_PITCH_RATE_VAL,PID_ROLL_RATE_VAL,PID_YAW_RATE_VAL;
+int m[4]; //motors
 
-PIDCont PIDroll,PIDpitch,PIDyaw;
+Kalman kalmanX, kalmanY,kalmanZ;
 
-int m1_val,m2_val,m3_val,m4_val; // Motor-values
+volatile double Pitch,Roll,Yaw;
+volatile float Alt;
+volatile float ZeroPressure;
+
+float press, temperature;
+
+volatile double setPitch = 0;  //Setpoint Pitch
+volatile double setRoll = 0;  //Setpoint Roll
+volatile double setYaw = 0;  //Setpoint Yawn
+volatile int throttle = 0;
+
+unsigned long time = millis();
+unsigned long AngleModeTime = millis();
+unsigned long AnglePIDTime = millis();
+unsigned long loopTime = millis();
+unsigned long timeMotors = millis();
+unsigned long timePID= millis();
+unsigned long timer = millis();
+unsigned long angleTime = millis();
+unsigned long time1 = millis();
+
+//States
+boolean alarm = false;
+boolean run   = false;
+boolean tmp   = true;
+boolean run_first = true;
+boolean stop_first = true;
+boolean alarm_low_first = true;
+boolean alarm_high_first = true;
+boolean MOTOR_INFO = false;
+boolean PIDS_ENABLED = false;
 
 unsigned long tp;
 
-float Pitch,Roll;
 
-volatile float gx_aver=0;
-volatile float gy_aver=0;
-volatile float gz_aver=0;
+int fastLoop;
 
-int accx_temp=0;
-int accy_temp=0;
-int accz_temp=0;
-
-char buffer[128];
-
-double pid[8][3];
-int serialdata;
-int inbyte;
-volatile int cmd;
-int i,pidN,PID,n,s;
-int biasAX=0,biasAY=0,biasAZ=0;
-int biasGX=0,biasGY=0,biasGZ=0;
-
-int setPitch = 0;  //Setpoint Pitch
-int setRoll = 0;  //Setpoint Roll
-int setYaw = 0;  //Setpoint Yawn
-int throttle =0;
-
-
-float accx, accy;
-
-float accPitch=0,gyroPitch=0;
-float accRoll2=0,accPitch2=0; //Test
-float accRoll=0, gyroRoll=0;
-
-unsigned long time = millis();
-unsigned long timer = millis();
-
-boolean alarm = false;
-boolean run = false;
 
 void setup(){
-  
-  
+    
   Wire.begin();  
   
   Serial1.begin(57600);  
   while(!Serial1);
   
-  TWBR = ((F_CPU / 400000L) - 16) / 2;
+   TWBR = 24;
    
   Serial1.println("#STARTING!");
+    
+    sensorInit();
+    PID_init();
+    motorInit();
+ // LED_INIT();
+ 
+  Serial1.println("#PRESS START TO ACTIVATE QUADCOPTER...");
+  
+  while(!run) 
+  {         
+      serial();       
+      updateSensorVal();
+      PID_COMPUTE();
+  }
    
-  sensorInit();
-  PID_init();
-  motorInit();
-  LED_INIT();
-  ledON(LED_G);
-  Serial1.println("#READY...");
-  
-  while(!run)
-  {     
-      serial();  
-      LED_ON(LED_Y);
-      if(run) 
-          motorArm();           
-  }LED_OFF(LED_Y);
-  
-  tp=millis();  
+  tp=millis(); 
   timer=millis(); 
+  time=millis();
 }
 
-void loop() {   
+void loop() 
+{    
+    while(run)
+    {  
+      loopTime = millis();  
+          if(run_first)
+          { 
+              Serial1.println("#START");
+              angleTime = millis();     
+              PID_RESET_I();     
+              run_first = false;
+              stop_first = true;
+          }
+      updateSensorVal();   
+      PID_COMPUTE();       
+      FlightAlarms();
+      serial(); 
+      motorWrite(); 
    
-  while(run){
+      fastLoop = (fastLoop + millis()-loopTime)/2;      
+    }     
     
-    LED_ON(LED_G);
-    LED_OFF(LED_R);    
-    
-    if((millis()-time) > ALARM_LOW && !alarm ){
+    if(stop_first)
+    {      
+          Serial1.println("#STOP");
+          motorStop();  
           setPitch=0;
           setRoll=0;
-          alarm = true;
-          Serial1.println("#AlarmLow;");
-      }  
-      if((millis()-time)>ALARM_HIGH && millis()-timer>1000){  
-          timer = millis();   
-          throttle = throttle*DESCEND_RATE;   //todo: if baro decend
-          Serial1.println("#Alarmhigh;");
-      }
- 
-    updateSensorVal(); 
+          setYaw=0;  
+          throttle=0;     
+          run_first = true;
+          stop_first = false;
+    }
+        
+    updateSensorVal();
+    PID_COMPUTE();
+    serial();  
     
-    FlightControl();
-    
-    serial();
-   
-
-    
-  }
-  LED_ON(LED_R);
-  LED_OFF(LED_G);
-  motorStop();
-  
-  setPitch=0;
-  setRoll=0;
-  setYaw=0;
-  throttle=0;
-    
-  serial();  
 }
-

@@ -1,135 +1,117 @@
+volatile int cmd;
+boolean validCMD = false;
+
 void serial()
-{
-   
-    
+{  
    if(Serial1.available()>1)
-   {
-     
+   {     
      time = millis();
-     alarm = false;
-     getSerial();
-       
-      switch(cmd)
+     alarm = false;     
+     cmd = Serial1.read();
+
+    if(cmd == 'S' || cmd == 'G')    
+      validCMD = true;
+    else
+      validCMD = false;
+            
+      if(validCMD)
       {
-        case 'S':  //SET
-                
-                getSerial();   
-                              
+          switch(cmd)
+          {
+            //*******************SET****************************
+              case 'S':  
+         
+                cmd = Serial1.read();
+                  
                 if(cmd == 'S')    //SET POINT
                 {                
-                       getSerial();
-                        
-                      if(cmd=='P')
-                          setPitch = Serial1.parseFloat(); 
-                      if(cmd=='R')
-                          setRoll  = Serial1.parseFloat(); 
-                      if(cmd=='Y')
-                          setYaw  = Serial1.parseFloat(); 
-                      if(cmd=='T')
-                          throttle = Serial1.parseInt();
+                      cmd = Serial1.read();                             
+                      if(cmd=='P') setPitch = Serial1.parseFloat();                        
+                      if(cmd=='R') setRoll  = Serial1.parseFloat(); 
+                      if(cmd=='Y') setYaw   = Serial1.parseFloat(); 
+                      if(cmd=='T') throttle = Serial1.parseInt();                                                                         
                 }                   
-                else if(cmd == 'P')  //PID VALUE
-                {
-                    pidN  = Serial1.parseInt();
-                    PID = Serial1.read();                     
-                    pid[pidN][n]= Serial1.parseFloat();        
-                } 
-                else if(cmd =='A')  //START
-                {                  
-                    run = true;
-                    Serial1.println("#Start!");                                           
-                }                
-                else if(cmd =='Q')   //STOP
-                {
-                    run = false; 
-                    Serial1.println("#STOP!");
-                }
-                else
-               
-        break;      
-        case 'G':  //GET
+                else if(cmd == 'P' && PIDS_ENABLED == true)  PID_CHANGE(Serial1.parseInt(),Serial1.parseInt(),Serial1.parseFloat());                                                                  
+                else if(cmd == 'A') run = true;                                                       
+                else if(cmd == 'Q') run = false;  
+                
+                #ifdef CALIBRATION
+                else if(cmd =='C')   //CALIBRATION 
+                {                    
+                    calibrateGYRO();
+                    calibrateACC();
+                }       
+                #endif
+                
+                else if(cmd =='R')  ZeroPressure = getAvg(movavg_buff, MOVAVG_SIZE);                
+                else if(cmd =='E')  PIDS_ENABLED = PIDS_ENABLED?false:true; 
+                
+
+                else if(cmd =='M')   //MOTOR TEST
+                {                       
+                    for(int i=0;i<4;i++)
+                    {
+                          delay(2000);
+                          m[i]=115;
+                          motorWrite();
+                          
+                    }delay(2000);                    
+                }      
         
-              getSerial();         
-              if(cmd =='M')
-              {
-                  Serial1.print("M");
-                  Serial1.print(m1_val);
-                  Serial1.print(" ");
-                  Serial1.print(m2_val);
-                  Serial1.print(" ");
-                  Serial1.print(m3_val);
-                  Serial1.print(" ");
-                  Serial1.println(m4_val);                  
-              }
-              else if (cmd=='S')
+            break;
+          //*******************GET****************************      
+            case 'G': 
+        
+              cmd = Serial1.read();
+                                        
+              if (cmd=='S')
               {                          
-                  Serial1.print("SetPitch: ");
-                  Serial1.println(setPitch);
-                  Serial1.print("SetRoll: ");
-                  Serial1.println(setRoll);
-                  Serial1.print("SetYaw: ");
-                  Serial1.println(setYaw);
-                  Serial1.print("SetThorttle: ");
-                  Serial1.println(throttle);  
-              }
+                  Serial1.print(Pitch);
+                  Serial1.print("   ");
+                  Serial1.println(Roll);
+              }            
               else if (cmd=='A')
               {                          
-                  Serial1.print("Pitch: ");
-                  Serial1.print(Pitch);
-                  Serial1.print(" Roll: ");
-                  Serial1.println(Roll);
-               //  Serial1.print("Yaw: ");
-               //  Serial1.println(Yaw);
+                  Serial1.print("setPitch: ");
+                  Serial1.println(setPitch);
+                  Serial1.print("setRoll: ");
+                  Serial1.println(setRoll);
+                  Serial1.print("setYaw: ");
+                  Serial1.println(setYaw);                
               }
-              else if (cmd=='G')
-              {                          
-                  Serial1.print(" ");
-                  Serial1.print(gx_aver);
-                  Serial1.print("  ");
-                  Serial1.print(gy_aver);
-                  Serial1.print("  ");
-                  Serial1.print(gz_aver);
-                  
-                  Serial1.print(" ");
-                  Serial1.print(gx_aver);
-                  Serial1.print("  ");
-                  Serial1.print(gy_aver);
-                  Serial1.print("  ");
-                  Serial1.print(gz_aver);
-                  
-              }       
-        else if (cmd=='C')
-              {                          
-                  Serial1.print(" ");
-                  Serial1.print((float)ax);
-                  Serial1.print("  ");
-                  Serial1.print((float)ay);
-                  Serial1.print("  ");
-                  Serial1.print((float)az);
-                  
-                  Serial1.print("  ");
-                  Serial1.print((float)axf);
-                  Serial1.print("  ");
-                  Serial1.print((float)ayf);
-                  Serial1.print("  ");
-                  Serial1.println((float)azf);
 
+              else if (cmd=='R')
+              {   
+                  mpu.getMotion6(&ax,&ay,&az,&gx,&gy,&gz);                                
+                  Serial1.print(ax);
+                  Serial1.print(" ");
+                  Serial1.print(ay);
+                  Serial1.print(" ");
+                  Serial1.print(az);
+                  Serial1.print(" ");
+                  Serial1.print(" ");
+                  Serial1.print(gx);
+                  Serial1.print(" ");
+                  Serial1.print(gy);
+                  Serial1.print(" ");
+                  Serial1.println(gz);                            
+              }
+              else if (cmd=='M')  MOTOR_INFO=MOTOR_INFO?false:true;              
+              else if (cmd=='B')  Serial1.println(baro.getPressure(MS561101BA_OSR_4096));
+              else if (cmd=='T')  Serial1.println(fastLoop);                
+            break;      
+         }        
+       } 
+    Serial1.flush();
+   }     
+}
 
-              }                         
-        break;      
-     }  
-     Serial1.flush();   
-   }
+void  getSerial()
+{    
+  while(Serial1.available() && (cmd == NULL || cmd == '\r' || cmd == '\n' || cmd==' '))  
+      cmd = Serial1.read();            
 }
 
 
-void getSerial()
-{ 
-  cmd = 0;
-  
-  while(Serial1.available() && (cmd == NULL || cmd== 0))  
-      cmd = Serial1.read(); 
-    
-}
 
 
