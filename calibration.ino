@@ -1,77 +1,34 @@
-float gX,gY,gZ,aX,aY,aZ;
-
 #ifdef CALIBRATION
 
-void calibrateESC()
-{
-  run = false; 
-  
-  Serial1.println("Warning calibrating motors!");
-  
-  analogWrite(MOTOR1,MOTOR_MAX_LEVEL);
-  analogWrite(MOTOR2,MOTOR_MAX_LEVEL);
-  analogWrite(MOTOR3,MOTOR_MAX_LEVEL);
-  analogWrite(MOTOR4,MOTOR_MAX_LEVEL); 
-  
-  
- Serial1.println("MOTOR MAX!!");
- 
-  delay(10000);
-  
-  Serial1.println("MOTOR ZERO");
-  analogWrite(MOTOR1,MOTOR_ZERO_LEVEL);
-  analogWrite(MOTOR2,MOTOR_ZERO_LEVEL);
-  analogWrite(MOTOR3,MOTOR_ZERO_LEVEL);
-  analogWrite(MOTOR4,MOTOR_ZERO_LEVEL);
- 
-   Serial1.println("Calibration done!");   
-  
-}
+float gX,gY,gZ,aX,aY,aZ;
 
-void calibrateGYRO() {    
+void calibrateGYRO()
+{    
   int i=0;
   gX=0;
   gY=0;
-  gZ=0;
+  gZ=0;  
   
-  
-   Serial1.println("Offset before calibration...");    
-   Serial1.print(mpu.getXGyroOffset());
-   Serial1.print("  ");
-   Serial1.print(mpu.getYGyroOffset());
-   Serial1.print("  ");
-   Serial1.println(mpu.getZGyroOffset());   
-    
-    mpu.setXGyroOffset(0);
-    mpu.setYGyroOffset(0);
-    mpu.setZGyroOffset(0); 
-
  Serial1.println("Calibrating gyro. Dont move the board!");
+ delay(10);
   while(i<500){ 
     
     mpu.getMotion6(&ax,&ay,&az,&gx,&gy,&gz);
-    
+        
     gX+=gx;
     gY+=gy;
     gZ+=gz;    
     i++;
-    
-  }      
-  
-        
-    mpu.setXGyroOffset((float)gX/i);
-    mpu.setYGyroOffset((float)gY/i);
-    mpu.setZGyroOffset((float)gZ/i);
-    
-    Serial1.println("Offset after calibration...");    
-    Serial1.print(mpu.getXGyroOffset());
-    Serial1.print("  ");
-    Serial1.print(mpu.getYGyroOffset());
-    Serial1.print("  ");
-    Serial1.println(mpu.getZGyroOffset());          
+    delay(4);
+  }         
+          
+    gx_offset = -gX/i;
+    gy_offset = -gY/i;
+    gz_offset = -gZ/i;
  
   Serial1.println("#GYRO Ready;");
 }
+/*
 
 void calibrateACC(){  
   int i=0;
@@ -122,8 +79,7 @@ void calibrateACC(){
     aZ+=az;    
     i++;
     delay(10);
-  }      
-    
+  }         
     Serial1.print("aX:");
     Serial1.println(aX);
     
@@ -133,12 +89,11 @@ void calibrateACC(){
     Serial1.print("aZ:");
     Serial1.println(aZ);
     
-    /*
+    
     mpu.setXAccelOffset((int)aX/i);
     mpu.setYAccelOffset((int)aY/i);
-    mpu.setZAccelOffset((int)aZ/i-4096);
-   
-    */
+    mpu.setZAccelOffset((int)aZ/i-4096);   
+    
     
     mpu.setXAccelOffset(-2373);
     mpu.setYAccelOffset(874);
@@ -154,5 +109,6 @@ void calibrateACC(){
   Serial1.println("#ACC Ready");
   
 }
+*/
 
 #endif

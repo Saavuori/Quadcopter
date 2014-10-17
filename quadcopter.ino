@@ -1,46 +1,38 @@
+#include <AK8975.h>
 #include <PID.h>
-#include <MS561101BA.h>
 #include <I2Cdev.h>
 #include <MPU6050.h>
+#include <MS561101BA.h>
 #include "Wire.h"
 #include "Config.h"
-#include "Kalman.h" 
+#include "kalman.h"
 
-MPU6050 mpu;
-MS561101BA baro = MS561101BA();
+//RX
+volatile int rxVal[4];
+double rxLimits[3] = {255,90,90};
 
-PID pids[6];  
+//Gyro
+int Set[3];
+double gyroRate[3];
+int gx_offset,gy_offset,gz_offset;
+//ACC
+int ax_offset,ay_offset,az_offset;
+//Pids
+PID pids[7];  
+int PID_PITCH_RATE_VAL,PID_ROLL_RATE_VAL,PID_YAW_RATE_VAL,PID_PITCH_ANGLE_VAL,PID_ROLL_ANGLE_VAL,PID_YAW_ANGLE_VAL,PID_ALT_VALUE;
 
-double SetX=0,SetY=0,SetZ=0;
-double gyroXrate;
-double gyroYrate;
-double gyroZrate;
-
-int PID_PITCH_RATE_VAL,PID_ROLL_RATE_VAL,PID_YAW_RATE_VAL;
-int m[4]; //motors
-
-Kalman kalmanX, kalmanY,kalmanZ;
-
-volatile double Pitch,Roll,Yaw;
-volatile float Alt;
-volatile float ZeroPressure;
-
-float press, temperature;
-
-volatile double setPitch = 0;  //Setpoint Pitch
-volatile double setRoll = 0;  //Setpoint Roll
-volatile double setYaw = 0;  //Setpoint Yawn
-volatile int throttle = 0;
-
-unsigned long time = millis();
-unsigned long AngleModeTime = millis();
-unsigned long AnglePIDTime = millis();
-unsigned long loopTime = millis();
+//times
+unsigned long Time = millis();
 unsigned long timeMotors = millis();
-unsigned long timePID= millis();
-unsigned long timer = millis();
-unsigned long angleTime = millis();
-unsigned long time1 = millis();
+unsigned long flightAlarm1 = millis();
+unsigned long flightAlarm2 = millis();
+unsigned long tp;
+unsigned long looptime=micros();
+unsigned long timePC = millis();
+unsigned long timeAccUpdate = millis();
+unsigned long timeBaroUpdate = millis();
+unsigned long temp = millis();
+
 
 //States
 boolean alarm = false;
@@ -48,83 +40,88 @@ boolean run   = false;
 boolean tmp   = true;
 boolean run_first = true;
 boolean stop_first = true;
-boolean alarm_low_first = true;
-boolean alarm_high_first = true;
-boolean MOTOR_INFO = false;
 boolean PIDS_ENABLED = false;
+boolean debugMode = false;
 
-unsigned long tp;
+//Flight Modes
+boolean angleMode = true;
+boolean altitudeHold = false;
+
+//Other
+int m[4]; //motors
+volatile int throttle = 0;
+double altitude=0,setAltitude=0;
+volatile float sea_press= 1013.25;
+
+double Pitch,Roll;
+
+Kalman kalmanX,kalmanY, kalmanA;
 
 
-int fastLoop;
-
-
-void setup(){
-    
+void setup()
+{    
+  
   Wire.begin();  
-  
-  Serial1.begin(57600);  
-  while(!Serial1);
-  
-   TWBR = 24;
-   
+  TWBR = 12;
+  Serial1.begin(57600);       
   Serial1.println("#STARTING!");
     
-    sensorInit();
-    PID_init();
-    motorInit();
- // LED_INIT();
+  sensorInit();
+  PID_init();
+  motorInit();
+  rxInit();    
  
   Serial1.println("#PRESS START TO ACTIVATE QUADCOPTER...");
   
-  while(!run) 
-  {         
-      serial();       
-      updateSensorVal();
-      PID_COMPUTE();
+    while(!run)
+  {
+    rxValues();
+    updateSensorVal(); 
+    PID_COMPUTE(); 
+    serial(); 
+    
+      if(rxVal[0]<1250&&rxVal[0]>1100&&rxVal[1]<1200&&rxVal[2]<1200 )
+        run = true;
   }
-   
+     
   tp=millis(); 
-  timer=millis(); 
-  time=millis();
+  flightAlarm1=millis();
 }
 
 void loop() 
 {    
     while(run)
     {  
-      loopTime = millis();  
+      Time = micros();  
           if(run_first)
-          { 
-              Serial1.println("#START");
-              angleTime = millis();     
-              PID_RESET_I();     
+          {                         
+              PID_RESET_I();
               run_first = false;
               stop_first = true;
+              Serial1.println("#START");
           }
+      rxValues();
       updateSensorVal();   
       PID_COMPUTE();       
       FlightAlarms();
-      serial(); 
+      serial();
       motorWrite(); 
+      looptime = micros()-Time;
+    }
    
-      fastLoop = (fastLoop + millis()-loopTime)/2;      
-    }     
-    
     if(stop_first)
     {      
           Serial1.println("#STOP");
-          motorStop();  
-          setPitch=0;
-          setRoll=0;
-          setYaw=0;  
+          motorStop();
           throttle=0;     
           run_first = true;
           stop_first = false;
     }
-        
-    updateSensorVal();
-    PID_COMPUTE();
-    serial();  
+      rxValues();
+      updateSensorVal();   
+      PID_COMPUTE();       
+     // FlightAlarms();
+      serial();
+     // motorWrite(); 
     
 }
