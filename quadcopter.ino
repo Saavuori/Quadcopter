@@ -1,87 +1,79 @@
-#include <AK8975.h>
-#include <PID.h>
 #include <I2Cdev.h>
-#include <MPU6050.h>
-#include <MS561101BA.h>
 #include "Wire.h"
 #include "Config.h"
-#include "kalman.h"
+#include <MPU6050.h>
+MPU6050 mpu;
+
+int16_t r[9]; 
 
 //RX
-volatile int rxVal[4];
-double rxLimits[3] = {255,90,90};
-
+volatile int rxVal[6] = {0,0,0,0,0,0};
+double rxLimits[3] = {255,45,45};
 //Gyro
-int Set[3];
-double gyroRate[3];
-int gx_offset,gy_offset,gz_offset;
-//ACC
-int ax_offset,ay_offset,az_offset;
+double gyroRate[6];
 //Pids
-PID pids[7];  
-int PID_PITCH_RATE_VAL,PID_ROLL_RATE_VAL,PID_YAW_RATE_VAL,PID_PITCH_ANGLE_VAL,PID_ROLL_ANGLE_VAL,PID_YAW_ANGLE_VAL,PID_ALT_VALUE;
+volatile int PID_PITCH_VAL,PID_ROLL_VAL,PID_YAW_VAL,PID_ALT_VALUE;
 
 //times
-unsigned long Time = millis();
-unsigned long timeMotors = millis();
-unsigned long flightAlarm1 = millis();
-unsigned long flightAlarm2 = millis();
-unsigned long tp;
-unsigned long looptime=micros();
-unsigned long timePC = millis();
-unsigned long timeAccUpdate = millis();
-unsigned long timeBaroUpdate = millis();
-unsigned long temp = millis();
+volatile unsigned long Timer[5] = {millis(),millis(),millis(),millis(),millis()};
+volatile unsigned long TimerUpdate[5] = {5,20,20,0,0};
 
+
+volatile unsigned long Time = millis();
+volatile unsigned long flightAlarm1 = millis();
+volatile unsigned long flightAlarm2 = millis();
+volatile unsigned long tp;
+volatile unsigned long looptime=micros();
+//volatile unsigned long timePC = millis();
+volatile unsigned long timeSerial = millis();
 
 //States
-boolean alarm = false;
-boolean run   = false;
-boolean tmp   = true;
-boolean run_first = true;
-boolean stop_first = true;
-boolean PIDS_ENABLED = false;
-boolean debugMode = false;
-
+volatile boolean alarm = true;
+volatile boolean run   = false;
+volatile boolean run_first = true;
+volatile boolean stop_first = true;
+volatile boolean PIDS_ENABLED = false;
+volatile boolean debugMode = false;
+volatile boolean debugMotors = false;
+volatile boolean debugRx = false;
+volatile boolean debugRaw = false;
+volatile boolean pidResetI = false;
 //Flight Modes
-boolean angleMode = true;
-boolean altitudeHold = false;
-
+volatile boolean angleMode = true;
+volatile boolean altitudeHold = false;
 //Other
-int m[4]; //motors
-volatile int throttle = 0;
-double altitude=0,setAltitude=0;
-volatile float sea_press= 1013.25;
-
-double Pitch,Roll;
-
-Kalman kalmanX,kalmanY, kalmanA;
-
+volatile double data[DATASIZE];
+volatile int m[4] = {0,0,0,0}; //motors
+volatile int Set[5] = {0,0,0,0,0};
+double setAltitude=0;
 
 void setup()
-{    
-  
+{      
   Wire.begin();  
-  TWBR = 12;
-  Serial1.begin(57600);       
-  Serial1.println("#STARTING!");
+  Serial1.begin(115200);   
+  delay(100);
+  Serial1.println("*****************");
+  Serial1.println("#INITIAL SETUP...");
     
   sensorInit();
   PID_init();
   motorInit();
-  rxInit();    
- 
+  rxInit();
+      
+  //led_init();  
+  //led_ON(LED_G); 
   Serial1.println("#PRESS START TO ACTIVATE QUADCOPTER...");
   
     while(!run)
   {
+    Time = micros();  
     rxValues();
     updateSensorVal(); 
     PID_COMPUTE(); 
-    serial(); 
-    
-      if(rxVal[0]<1250&&rxVal[0]>1100&&rxVal[1]<1200&&rxVal[2]<1200 )
-        run = true;
+    serial();
+    telemetry();
+             
+    data[LOOPTIME] = micros()-Time;
   }
      
   tp=millis(); 
@@ -90,38 +82,48 @@ void setup()
 
 void loop() 
 {    
+  Time = micros();  
     while(run)
     {  
       Time = micros();  
           if(run_first)
-          {                         
+          {       
               PID_RESET_I();
               run_first = false;
               stop_first = true;
               Serial1.println("#START");
           }
       rxValues();
-      updateSensorVal();   
+      FlightAlarms(); 
+      updateSensorVal(); 
+      
+     if(millis()-Timer[MAIN]>TimerUpdate[MAIN])
+     {
+      Timer[MAIN]=millis();
       PID_COMPUTE();       
-      FlightAlarms();
+      motorWrite();
+     }
+      
+      telemetry();
       serial();
-      motorWrite(); 
-      looptime = micros()-Time;
+      
+      data[LOOPTIME] = micros()-Time;
+           
     }
    
     if(stop_first)
-    {      
+    {     
           Serial1.println("#STOP");
           motorStop();
-          throttle=0;     
+          data[THROTTLE]=0;     
           run_first = true;
           stop_first = false;
     }
       rxValues();
       updateSensorVal();   
       PID_COMPUTE();       
-     // FlightAlarms();
       serial();
-     // motorWrite(); 
-    
+      telemetry();
+      
+  data[LOOPTIME] = micros()-Time;
 }
