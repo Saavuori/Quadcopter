@@ -87,9 +87,9 @@
 #define ALARM_LOW 1000
 #define ALARM_HIGH 5000
 #define ANGLE_ALARM 2000
-#define DESCEND_RATE 0,98
+#define DESCEND_RATE 0.98    // throttle multiplier per second once ALARM_HIGH is reached
 //----------------------------------------
-#define radToDeg 57,29577
+#define radToDeg 57.29577
 
 
 
