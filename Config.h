@@ -61,6 +61,7 @@
 
 #define MOTOR_ZERO_LEVEL  100
 #define MOTOR_MAX_LEVEL  255
+#define MOTOR_TEST_LEVEL  110  // slow spin used by the 'SM' motor test
 
 #define MOTOR4  5     //  1  pun
 #define MOTOR3  6    //  4  vih
@@ -70,8 +71,8 @@
 
 //.......RX............
 
-#define RX_ROLL 14     //PCINT2 
-#define RX_PITCH 16    //PCINT3
+#define RX_ROLL 14     //PCINT3 
+#define RX_PITCH 16    //PCINT2
 #define RX_YAW 15      //PCINT1
 #define RX_THROTTLE 8  //PCINT4
 //#define RX_AUX1 11

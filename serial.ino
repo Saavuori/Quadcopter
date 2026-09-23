@@ -58,7 +58,6 @@ void serial()
                 }
                 else if(cmd =='R')  angleMode = angleMode?false:true;
                 else if(cmd =='D')  debugMode = debugMode?false:true;
-                else if(cmd =='D')  throttleRateMode = throttleRateMode?false:true;
 
                 
                 else if(cmd =='H')  
@@ -82,7 +81,7 @@ void serial()
                     for(int i=0;i<4;i++)
                     {
                           delay(1000);
-                          m[i]=110;
+                          m[i]=MOTOR_TEST_LEVEL;
                           motorWrite();
                           
                     }delay(1000);   
@@ -134,12 +133,3 @@ void serial()
     Serial1.flush();
    }     
 }
-void  getSerial()
-{    
-  while(Serial1.available() && (cmd == NULL || cmd == '\r' || cmd == '\n' || cmd==' '))  
-      cmd = Serial1.read();            
-}
-
-
-
-
