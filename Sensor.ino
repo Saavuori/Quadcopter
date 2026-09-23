@@ -67,9 +67,9 @@ void updateSensorVal()
     t = micros();    
     mpu.getMotion6(&ax,&ay,&az,&gx,&gy,&gz); 
           
-    gyroRate[0] = ((gx+gx_offset)/14.375);    
-    gyroRate[1] = ((gy+gy_offset)/14.375);    
-    gyroRate[2] = ((gz+gz_offset)/14.375);
+    gyroRate[0] = ((gx+gx_offset)/GYRO_LSB_PER_DPS);    
+    gyroRate[1] = ((gy+gy_offset)/GYRO_LSB_PER_DPS);    
+    gyroRate[2] = ((gz+gz_offset)/GYRO_LSB_PER_DPS);
           
     if(millis()-timeAccUpdate>1)
     {

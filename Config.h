@@ -51,6 +51,9 @@
 
 //*********Sensor Config****************
 
+// MPU6050 gyro sensitivity at MPU6050_GYRO_FS_2000 (+/-2000 deg/s), from the
+// datasheet. 14.375 is the ITG-3200 value and does not apply to this sensor.
+#define GYRO_LSB_PER_DPS 16.4
 //----------------------------------
 
 //***********MOTOR CONFIG**************
