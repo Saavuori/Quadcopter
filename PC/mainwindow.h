@@ -73,6 +73,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     void keyPressEvent(QKeyEvent *event);
+    void sendPidParameter(int pid, int param, double value);
     QTimer *timerMOTOR;
     QTimer *timerSerialBuffer;
     SerialHandler *serialhandler;

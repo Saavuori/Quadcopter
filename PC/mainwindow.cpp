@@ -113,192 +113,96 @@ void MainWindow::on_slider_pitch_valueChanged(int value)
 
 
 //**************PID ANGLE*********************//
-void MainWindow::on_pid_yawn_d_valueChanged(double arg1)
+// "SP<pid> <param> <value>": pid 0-2 = rate pitch/roll/yaw, 3-5 = angle
+// pitch/roll/yaw (PID_* in the firmware Config.h); param 1 = P, 2 = I, 3 = D.
+void MainWindow::sendPidParameter(int pid, int param, double value)
 {
     output.clear();
 
-    output.append("SP5 3 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
+    output.append("SP");
+    output.append(QByteArray::number(pid));
+    output.append(' ');
+    output.append(QByteArray::number(param));
+    output.append(' ');
+    output.append(QString::number((float)value));
     output.append("\r\n");
 
     writeSerial(output);
-
+}
+void MainWindow::on_pid_yawn_d_valueChanged(double arg1)
+{
+    sendPidParameter(5, 3, arg1);
 }
 void MainWindow::on_pid_yawn_i_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP5 2 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(5, 2, arg1);
 }
 void MainWindow::on_pid_yawn_p_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP5 1 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
-
+    sendPidParameter(5, 1, arg1);
 }
 void MainWindow::on_pid_pitch_p_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP3 1 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(3, 1, arg1);
 }
 void MainWindow::on_pid_pitch_i_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP3 2 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(3, 2, arg1);
 }
 void MainWindow::on_pid_pitch_d_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP3 3 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(3, 3, arg1);
 }
 void MainWindow::on_pid_roll_p_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP4 1 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(4, 1, arg1);
 }
 void MainWindow::on_pid_roll_i_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP4 2 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(4, 2, arg1);
 }
 void MainWindow::on_pid_roll_d_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP4 3 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(4, 3, arg1);
 }
 //-------------------------------------------//
 
 //**************PID RATE*********************//
 void MainWindow::on_pid_yawn_d_2_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP2 3 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
-
+    sendPidParameter(2, 3, arg1);
 }
 void MainWindow::on_pid_yawn_i_2_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP2 2 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(2, 2, arg1);
 }
 void MainWindow::on_pid_yawn_p_2_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP2 1 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
-
+    sendPidParameter(2, 1, arg1);
 }
 void MainWindow::on_pid_pitch_p_2_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP0 1 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(0, 1, arg1);
 }
 void MainWindow::on_pid_pitch_i_2_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP0 2 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(0, 2, arg1);
 }
 void MainWindow::on_pid_pitch_d_2_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP0 3 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(0, 3, arg1);
 }
 void MainWindow::on_pid_roll_p_2_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP1 1 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(1, 1, arg1);
 }
 void MainWindow::on_pid_roll_i_2_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP1 2 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(1, 2, arg1);
 }
 void MainWindow::on_pid_roll_d_2_valueChanged(double arg1)
 {
-    output.clear();
-
-    output.append("SP1 3 ");             //1. Pitc 2. Roll 3. Yaw   //1. P 2. I 3.D
-    output.append(QString::number((float)arg1));
-    output.append("\r\n");
-
-    writeSerial(output);
+    sendPidParameter(1, 3, arg1);
 }
 //-------------------------------------------//
 
