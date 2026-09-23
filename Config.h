@@ -13,6 +13,7 @@
 #define PID_ROLL_ANGLE 4
 #define PID_YAW_ANGLE 5
 #define PID_ALTITUDE_HOLD 6
+#define PID_COUNT 7            // number of PID controllers (indices above)
 
 #define ALT_PID_KP 20.000
 #define ALT_PID_KI 0.000

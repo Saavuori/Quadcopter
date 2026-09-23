@@ -21,7 +21,18 @@ void serial()
          
                 cmd = Serial1.read();                  
                  
-                if(cmd == 'P' && PIDS_ENABLED == true)  PID_CHANGE(Serial1.parseInt(),Serial1.parseInt(),Serial1.parseFloat());                                                                  
+                // "SP<pid> <param> <value>" and "SL<axis> <limit>": read the fields
+                // into locals so they are parsed in the order they arrive. As
+                // function arguments or on both sides of '=' their evaluation
+                // order is unspecified, and the indices come from the link.
+                if(cmd == 'P' && PIDS_ENABLED == true)
+                {
+                    int pid     = Serial1.parseInt();
+                    int param   = Serial1.parseInt();
+                    float value = Serial1.parseFloat();
+                    if(pid >= 0 && pid < PID_COUNT)
+                        PID_CHANGE(pid,param,value);
+                }
                 else if(cmd == 'A') run = true;                                                       
                 else if(cmd == 'Q') run = false;  
                 
@@ -34,7 +45,13 @@ void serial()
                 #endif
                             
                 else if(cmd =='E')  PIDS_ENABLED = PIDS_ENABLED?false:true;
-                else if(cmd =='L')  rxLimits[Serial1.parseInt()]=Serial1.parseInt();                
+                else if(cmd =='L')
+                {
+                    int axis  = Serial1.parseInt();
+                    int limit = Serial1.parseInt();
+                    if(axis >= 0 && axis < (int)(sizeof(rxLimits)/sizeof(rxLimits[0])))
+                        rxLimits[axis]=limit;
+                }
                 else if(cmd =='R')  angleMode = angleMode?false:true;
                 else if(cmd =='D')  debugMode = debugMode?false:true;
                 else if(cmd =='D')  throttleRateMode = throttleRateMode?false:true;

@@ -13,7 +13,7 @@ void PID_init(){
   Serial1.println("#PID INITIALIZED!");
 }
 
-double PID_CHANGE(int i,int j, float k)
+void PID_CHANGE(int i,int j, float k)
 {
      pids[i].ChangeParameters(j,k);
  
@@ -76,7 +76,7 @@ void PID_COMPUTE()
 
 void PID_RESET_I()
 {  
-      for(int i=0;i<7;i++)
+      for(int i=0;i<PID_COUNT;i++)
         pids[i].resetI();
 }
 
