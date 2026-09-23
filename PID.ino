@@ -60,8 +60,10 @@ void PID_COMPUTE()
     m[2] = throttle-PID_ROLL_RATE_VAL+PID_PITCH_RATE_VAL+PID_YAW_RATE_VAL+PID_ALT_VALUE; 
     m[3] = throttle+PID_ROLL_RATE_VAL+PID_PITCH_RATE_VAL-PID_YAW_RATE_VAL+PID_ALT_VALUE;
            
+    // analogWrite() keeps only the low byte, so a negative value would wrap
+    // to a high duty cycle. Never command less than the motors-off level.
     for(int i=0;i<4;i++)
-      m[i]=m[i]>MOTOR_MAX_LEVEL?MOTOR_MAX_LEVEL:m[i];
+      m[i]=constrain(m[i],MOTOR_ZERO_LEVEL,MOTOR_MAX_LEVEL);
         
       printMotors(false); 
 }
