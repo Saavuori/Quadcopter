@@ -2,7 +2,6 @@ int16_t gx, gy, gz,ax,ay,az,mx,my,mz;
 
 double MX,MY;
 
-MPU6050 mpu;
 AK8975 mag(0x0C);
 
 float heading;
@@ -75,7 +74,7 @@ void updateSensorVal()
     {
                                                
          Pitch  = atan2(ax,az)*radToDeg; 
-         Roll = atan(ay/sqrt(pow((az),2)+pow((ax),2)))*radToDeg;                    
+         Roll = atan2(ay,sqrt(pow((az),2)+pow((ax),2)))*radToDeg;                    
          Pitch = kalmanX.getAngle(Pitch, -gyroRate[1], dt);
          Roll = kalmanY.getAngle(Roll, -gyroRate[0], dt); 
                                                                                
