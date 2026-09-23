@@ -39,7 +39,11 @@ void serial()
                 #ifdef CALIBRATION
                 else if(cmd =='C')   //CALIBRATION 
                 {                    
-                    calibrateGYRO();
+                    // Blocks for ~2 s with the motors left as they are.
+                    if(run)
+                        Serial1.println("#NOT WHILE ARMED");
+                    else
+                        calibrateGYRO();
                     //calibrateACC();
                 }       
                 #endif
@@ -64,6 +68,11 @@ void serial()
                 } 
                              
 
+                else if(cmd =='M' && run)
+                {
+                    // The test overwrites every motor and blocks for ~5 s.
+                    Serial1.println("#NOT WHILE ARMED");
+                }
                 else if(cmd =='M')   //MOTOR TEST
                 {    
                     m[0]=MOTOR_ZERO_LEVEL;
@@ -125,7 +134,6 @@ void serial()
     Serial1.flush();
    }     
 }
-
 void  getSerial()
 {    
   while(Serial1.available() && (cmd == NULL || cmd == '\r' || cmd == '\n' || cmd==' '))  
