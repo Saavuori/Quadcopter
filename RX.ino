@@ -37,12 +37,20 @@ void rxValues()
 {  
   if(!alarm)
   {
-    if(!altitudeHold)      
-      throttle=map(rxVal[0],1100,1900,50,rxLimits[0]);  
-      
-    Set[0]=map(rxVal[1],1100,1900,-rxLimits[1],rxLimits[1]);    
-    Set[1]=map(rxVal[2],1100,1900,-rxLimits[1],rxLimits[1]); 
-    
-    Set[2]=map(rxVal[3],1100,1900,rxLimits[2],-rxLimits[2]);  
+    // rxVal[] is written by the pin-change ISR and an int is two bytes on
+    // AVR: copy it with interrupts off so no value is read half old, half new.
+    int rx[4];
+    noInterrupts();
+    for(byte i=0;i<4;i++)
+      rx[i]=rxVal[i];
+    interrupts();
+
+    if(!altitudeHold)
+      throttle=map(rx[0],1100,1900,50,rxLimits[0]);
+
+    Set[0]=map(rx[1],1100,1900,-rxLimits[1],rxLimits[1]);
+    Set[1]=map(rx[2],1100,1900,-rxLimits[1],rxLimits[1]);
+
+    Set[2]=map(rx[3],1100,1900,rxLimits[2],-rxLimits[2]);
   }
 }
