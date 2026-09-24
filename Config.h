@@ -13,6 +13,7 @@
 #define PID_ROLL_ANGLE 4
 #define PID_YAW_ANGLE 5
 #define PID_ALTITUDE_HOLD 6
+#define PID_COUNT 7            // number of PID controllers (indices above)
 
 #define ALT_PID_KP 20.000
 #define ALT_PID_KI 0.000
@@ -51,12 +52,16 @@
 
 //*********Sensor Config****************
 
+// MPU6050 gyro sensitivity at MPU6050_GYRO_FS_2000 (+/-2000 deg/s), from the
+// datasheet. 14.375 is the ITG-3200 value and does not apply to this sensor.
+#define GYRO_LSB_PER_DPS 16.4
 //----------------------------------
 
 //***********MOTOR CONFIG**************
 
 #define MOTOR_ZERO_LEVEL  100
 #define MOTOR_MAX_LEVEL  255
+#define MOTOR_TEST_LEVEL  110  // slow spin used by the 'SM' motor test
 
 #define MOTOR4  5     //  1  pun
 #define MOTOR3  6    //  4  vih
@@ -66,8 +71,8 @@
 
 //.......RX............
 
-#define RX_ROLL 14     //PCINT2 
-#define RX_PITCH 16    //PCINT3
+#define RX_ROLL 14     //PCINT3 
+#define RX_PITCH 16    //PCINT2
 #define RX_YAW 15      //PCINT1
 #define RX_THROTTLE 8  //PCINT4
 //#define RX_AUX1 11
@@ -87,9 +92,9 @@
 #define ALARM_LOW 1000
 #define ALARM_HIGH 5000
 #define ANGLE_ALARM 2000
-#define DESCEND_RATE 0,98
+#define DESCEND_RATE 0.98    // throttle multiplier per second once ALARM_HIGH is reached
 //----------------------------------------
-#define radToDeg 57,29577
+#define radToDeg 57.29577
 
 
 
